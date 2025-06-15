@@ -1,4 +1,6 @@
 import os
+from typing import List
+
 import torch
 import torch.nn as nn
 import pandas as pd
@@ -25,13 +27,29 @@ def normalize_data(data: torch.tensor, data_mean: torch.float32, data_std: torch
     return (data - data_mean) / (data_std + epsilon)
 
 
+def split_csv_into_x_and_y(
+        csv_path: str,
+        input_cols: List[str],
+        label_cols: List[str]
+) -> tuple[torch.tensor, torch.tensor]:
+    csv_file_path = os.path.dirname(os.path.realpath(__file__)) + '/' + csv_path
+    df = pd.read_csv(csv_file_path).dropna()
+    x_data_df = df[input_cols]
+    y_data_df = df[label_cols]
+    x_data = torch.tensor(x_data_df.values, dtype=torch.float32)
+    y_data = torch.tensor(y_data_df.values, dtype=torch.float32)
+    return x_data, y_data
+
+
+
 # Read housing price data as csv
-csv_file_path = os.path.dirname(os.path.realpath(__file__)) + '/housing_prices_dataset.csv'
-df = pd.read_csv(csv_file_path).dropna()
-x_data_df = df[['area', 'bathrooms', 'bedrooms', 'stories']]
-y_data_df = df['price']
-x_data = torch.tensor(x_data_df.values, dtype=torch.float32)
-y_data = torch.tensor(y_data_df.values, dtype=torch.float32).unsqueeze(1)
+x_data, y_data = split_csv_into_x_and_y(
+    csv_path='housing_prices_dataset.csv',
+    input_cols=['area', 'bathrooms', 'bedrooms', 'stories'],
+    label_cols=['price']
+)
+
+
 x_mean, x_std = calculate_mean_std(x_data)
 x_data = normalize_data(x_data, data_mean=x_mean, data_std=x_std)
 
