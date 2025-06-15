@@ -1,7 +1,7 @@
+import os
 import torch
 import torch.nn as nn
 import pandas as pd
-from typing import Callable
 import matplotlib.pyplot as plt
 
 
@@ -22,13 +22,12 @@ def calculate_mean_std(data: torch.tensor) -> tuple[torch.tensor, torch.tensor]:
 
 
 def normalize_data(data: torch.tensor, data_mean: torch.float32, data_std: torch.float32, epsilon: torch.float32 = 1e-8) -> torch.tensor:
-    # data_mean = data.mean(dim=0, keepdim=True)
-    # data_std  = data.std(dim=0, keepdim=True)
     return (data - data_mean) / (data_std + epsilon)
 
 
 # Read housing price data as csv
-df = pd.read_csv('housing_prices_dataset.csv').dropna()
+csv_file_path = os.path.dirname(os.path.realpath(__file__)) + '/housing_prices_dataset.csv'
+df = pd.read_csv(csv_file_path).dropna()
 x_data_df = df[['area', 'bathrooms', 'bedrooms', 'stories']]
 y_data_df = df['price']
 x_data = torch.tensor(x_data_df.values, dtype=torch.float32)
